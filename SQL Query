@@ -1,0 +1,62 @@
+1. Monthly Active User per Tahun
+
+select 
+	year, 
+	round(avg(mau), 0) as average_mau
+from (
+	select 
+		date_part('year', o.order_purchase_timestamp) as year,
+		date_part('month', o.order_purchase_timestamp) as month,
+		count(distinct c.customer_unique_id) as mau
+	from orders o 
+	join customers c on o.customer_id = c.customer_id
+	group by year, month 
+) subq
+group by year
+
+2. New Customers
+select 
+	date_part('year', first_purchase_time) as year,
+	count(1) as new_customers
+from (
+	select 
+		c.customer_unique_id,
+		min(o.order_purchase_timestamp) as first_purchase_time
+	from orders o 
+	join customers c on c.customer_id = o.customer_id
+	group by customer_unique_id
+) subq
+group by year
+ 
+3. Repeating Customers
+select 
+	year, 
+	count(distinct customer_unique_id) as repeating_customers
+from (
+	select 
+		date_part('year', o.order_purchase_timestamp) as year,
+		c.customer_unique_id,
+		count(1) as purchase_frequency
+	from orders o 
+	join customers c on c.customer_id = o.customer_id
+	group by year, customer_unique_id
+	having count(1) > 1
+) subq
+group by year
+
+4. Customer Average Orders
+select 
+	year, 
+	round(avg(frequency_purchase),3) as avg_orders_per_customers 
+from (
+	select 
+		date_part('year', o.order_purchase_timestamp) as year,
+		c.customer_unique_id,
+		count(1) as frequency_purchase
+	from orders o 
+	join customers c on c.customer_id = o.customer_id
+	group by year, customer_unique_id
+) a
+group by year
+
+5. Hasil Metrik
