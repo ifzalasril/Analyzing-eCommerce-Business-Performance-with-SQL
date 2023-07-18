@@ -1,0 +1,22 @@
+Berdasarkan gambar skema yang diberikan,
+dapat dilihat bahwa diantara panah yang menghubungkan setiap dataset terdapat nama kolom ditengahnya.
+Hal tersebut menunjukkan bahwa, kolom tersebut menjadi kolom kunci yang menghubungkan dataset dengan dataset lainnya.
+
+Untuk hubungan antar dataset yang lainnya dapat menggunakan cara yang sama seperti contoh sebelumnya dalam menentukan primary key dan foreign key,
+sehingga diperoleh query yang tepat sebagai berikut:
+
+- Primary key untuk tabel lainnya
+alter table customers add constraint pk_cust primary key (customer_id);
+alter table geolocation add constraint pk_geo primary key (geo_zip_code_prefix);
+alter table orders add constraint pk_orders primary key (order_id);
+alter table sellers add constraint pk_seller primary key (seller_id);
+
+- Foreign key untuk hubungan antar tabel lainnya
+alter table customers add foreign key (customer_zip_code_prefix) references geolocation;
+alter table orders add foreign key (customer_id) references customers;
+alter table order_items add foreign key (order_id) references orders;
+alter table order_items add foreign key (seller_id) references sellers;
+alter table sellers add foreign key (seller_zip_code_prefix) references geolocation;
+alter table payments add foreign key (order_id) references orders;
+alter table order_items add foreign key (product_id) references products;
+alter table reviews add foreign key (order_id) references orders;
