@@ -1,62 +1,65 @@
-1. Monthly Active User per Tahun
+1. Monthly Active User per Year
 
-select 
-	year, 
-	round(avg(mau), 0) as average_mau
-from (
-	select 
-		date_part('year', o.order_purchase_timestamp) as year,
-		date_part('month', o.order_purchase_timestamp) as month,
-		count(distinct c.customer_unique_id) as mau
-	from orders o 
-	join customers c on o.customer_id = c.customer_id
-	group by year, month 
+SELECT 
+	YEAR, 
+	round(AVG(mau), 0) AS average_monthly_active_user
+FROM (
+	SELECT 
+		date_part('year', o.order_purchase_timestamp) AS YEAR,
+		date_part('month', o.order_purchase_timestamp) AS MONTH,
+		COUNT(DISTINCT c.customer_unique_id) AS mau
+	FROM orders o 
+	JOIN customers c ON o.customer_id = c.customer_id
+	GROUP BY YEAR, MONTH 
 ) subq
-group by year
+GROUP BY YEAR
 
 2. New Customers
-select 
-	date_part('year', first_purchase_time) as year,
-	count(1) as new_customers
-from (
-	select 
+SELECT 
+	date_part('year', first_purchase_time) AS YEAR,
+	COUNT(1) AS new_customers
+FROM (
+	SELECT 
 		c.customer_unique_id,
-		min(o.order_purchase_timestamp) as first_purchase_time
-	from orders o 
-	join customers c on c.customer_id = o.customer_id
-	group by customer_unique_id
+		MIN(o.order_purchase_timestamp) AS first_purchase_time
+	FROM orders o 
+	JOIN customers c ON c.customer_id = o.customer_id
+	GROUP BY customer_unique_id
 ) subq
-group by year
+GROUP BY YEAR
+ORDER BY YEAR
  
 3. Repeating Customers
-select 
-	year, 
-	count(distinct customer_unique_id) as repeating_customers
-from (
-	select 
-		date_part('year', o.order_purchase_timestamp) as year,
+
+SELECT 
+	YEAR, 
+	COUNT(DISTINCT customer_unique_id) AS repeating_customers
+FROM (
+	SELECT 
+		date_part('year', o.order_purchase_timestamp) AS YEAR,
 		c.customer_unique_id,
-		count(1) as purchase_frequency
-	from orders o 
-	join customers c on c.customer_id = o.customer_id
-	group by year, customer_unique_id
-	having count(1) > 1
+		COUNT(1) AS purchase_frequency
+	FROM orders o 
+	JOIN customers c ON c.customer_id = o.customer_id
+	GROUP BY YEAR, customer_unique_id
+	HAVING COUNT(1) > 1
 ) subq
-group by year
+GROUP BY YEAR
 
 4. Customer Average Orders
-select 
-	year, 
-	round(avg(frequency_purchase),3) as avg_orders_per_customers 
-from (
-	select 
-		date_part('year', o.order_purchase_timestamp) as year,
+
+SELECT 
+	YEAR, 
+	ROUND(AVG(frequency_purchase),3) AS avg_orders_per_customers 
+FROM (
+	SELECT 
+		date_part('year', o.order_purchase_timestamp) AS YEAR,
 		c.customer_unique_id,
-		count(1) as frequency_purchase
-	from orders o 
-	join customers c on c.customer_id = o.customer_id
-	group by year, customer_unique_id
+		COUNT(1) AS frequency_purchase
+	FROM orders o 
+	JOIN customers c ON c.customer_id = o.customer_id
+	GROUP BY YEAR, customer_unique_id
 ) a
-group by year
+GROUP BY YEAR
 
 5. Hasil Metrik
